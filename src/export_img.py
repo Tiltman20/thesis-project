@@ -1,20 +1,19 @@
 import cv2
-vidcap = cv2.VideoCapture('res/videos/Rittmeier/test_1.MOV')
-success,image = vidcap.read()
-frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
-print(frame_count)
-max_images = 1000
-steps = frame_count//max_images
-# steps = 1
+import progressbar as progressbar
 
-# print(frame_count, steps, max_images)
 
-actual_count = 0
-
-while success:
-  if actual_count % steps == 0:
-     cv2.imwrite("res/images/Rittmeier/test_1/frame_%s.jpg" % actual_count, image)     # save frame as JPEG file 
-   #   print("img%d saved" % actual_count)
-  actual_count+=1
+def export_images(video_path, image_path):
+  vidcap = cv2.VideoCapture(video_path)
   success,image = vidcap.read()
-print("done")
+  frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
+  max_images = 200
+  steps = frame_count//max_images
+  actual_count = 0
+
+  for i in progressbar.progressbar(range(frame_count), 0, frame_count, prefix="Exporting Images:"):
+    if actual_count % steps == 0:
+      cv2.imwrite(image_path + "/frame_%s.jpg" % actual_count, image)     # save frame as JPEG file 
+    actual_count+=1
+    success,image = vidcap.read()
+    if not success:
+      break

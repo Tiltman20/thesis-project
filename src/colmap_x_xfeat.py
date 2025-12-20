@@ -56,9 +56,9 @@ class xFeatImplementation:
     def write_camera_to_db(self):
         self.db.add_camera(
             model=1,
-            width=960,
-            height=540,
-            params=[572, 467, 960/2, 540/2]
+            width=1920,
+            height=1080,
+            params=[1920, 1080, 960, 540]
         )
         self.db.commit()
     
@@ -242,9 +242,9 @@ def incremental_mapping_with_pbar(database_path, image_path, sfm_path):
             )
     return reconstructions
 
-def run():
-    output_path = Path("res/test_results/test8")
-    image_path = Path("res/images/test8/scaled")
+def run(output_path, image_path):
+    # output_path = Path("res/test_results/Rittmeier/test_2")
+    # image_path = Path("res/images/Rittmeier/test_2/scaled")
     database_path = output_path / "database.db"
     sfm_path = output_path / "sfm"
     mvs_path = output_path / "mvs"
