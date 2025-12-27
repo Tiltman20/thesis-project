@@ -6,8 +6,8 @@ import argparse
 import subprocess
 
 VIDEO_PATH = "res/videos/Rittmeier/test_1.MOV"
-IMAGE_PATH = "res/images/Rittmeier/test_2"
-COLMAP_BASE_PATH = Path("res/test_results/Rittmeier/test_2")
+IMAGE_PATH = "res/colmap-test/Rittmeier/test_3/images"
+COLMAP_BASE_PATH = Path("res/colmap-test/Rittmeier/test_3/sparse")
 
 def main():
     parser = argparse.ArgumentParser(description="Pipeline for xFeat supplied COLMAP")
@@ -23,10 +23,10 @@ def main():
     )
     args = parser.parse_args()
     if not args.noimport:
-        exim.export_images(VIDEO_PATH, IMAGE_PATH)
+        exim.export_images(VIDEO_PATH, IMAGE_PATH, 750)
     if not args.noscale:
-        scim.scale_images(IMAGE_PATH, 0.5)
-    cf.run(COLMAP_BASE_PATH, IMAGE_PATH+"/scaled")
+        scim.scale_images(IMAGE_PATH, 0.25)
+    cf.run(COLMAP_BASE_PATH, IMAGE_PATH)
 
 
 if __name__ == "__main__":

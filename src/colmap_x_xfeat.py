@@ -11,24 +11,8 @@ import random
 import os
 
 # Try to import pycolmap and give actionable error if C++ backend is missing
-try:
-    import pycolmap
-except Exception as _pycolmap_err:
-    # Short, actionable diagnostics and recommended fixes
-    print("Error: Cannot import pycolmap C++ backend (pycolmap._core).")
-    print(f"Original error: {_pycolmap_err}")
-    print("")
-    print("Possible fixes (choose what applies to your setup):")
-    print("  1) Install the Python package (try):")
-    print("       python -m pip install pycolmap")
-    print("  2) If you built pycolmap from source, ensure the compiled extension is on your PYTHONPATH")
-    print("     and that any required DLLs are findable (on Windows add their folder to PATH).")
-    print("  3) On Windows, install the Microsoft Visual C++ Redistributable (2015-2022).")
-    print("  4) Read pycolmap README for platform-specific build/install instructions:")
-    print("       https://github.com/mihaidusmanu/pycolmap")
-    print("")
-    print("Exiting. Fix the installation above and re-run the script.")
-    raise SystemExit(1)
+
+import pycolmap
 
 _project_root = Path(__file__).parent.parent
 _libs_dir = _project_root / "libs"
@@ -47,6 +31,8 @@ from progressbar import progressbar
 
 class xFeatImplementation:
 
+    num_images = 0
+
     def build_db(self, path_to_db):
         if path_to_db.exists():
             path_to_db.unlink()
@@ -56,9 +42,9 @@ class xFeatImplementation:
     def write_camera_to_db(self):
         self.db.add_camera(
             model=1,
-            width=1920,
-            height=1080,
-            params=[1920, 1080, 960, 540]
+            width=1920/2,
+            height=1080/2,
+            params=[1920/2, 1080/2, 960/2, 540/2]
         )
         self.db.commit()
     
@@ -148,6 +134,7 @@ class xFeatImplementation:
 
         print("Features extracted.\nMatching features...")
 
+        global num_images 
         num_images = len(self.features)
 
         for i, f1 in progressbar(enumerate(self.features)):
@@ -221,13 +208,7 @@ class xFeatImplementation:
                 color[i] = 0
         return color
 
-def incremental_mapping_with_pbar(database_path, image_path, sfm_path):
-    db = pycolmap.Database()
-    db.open(str(database_path))
-    try:
-        num_images = db.num_images
-    finally:
-        db.close()
+def incremental_mapping_with_pbar(num_images, database_path, image_path, sfm_path):
     with enlighten.Manager() as manager:
         with manager.counter(
             total = num_images, desc="Images registered"
@@ -235,7 +216,7 @@ def incremental_mapping_with_pbar(database_path, image_path, sfm_path):
             pbar.update(0, force=True)
             reconstructions = pycolmap.incremental_mapping(
                 str(database_path),
-                str(image_path),
+                str(image_path)+"/",
                 str(sfm_path),
                 initial_image_pair_callback=lambda: pbar.update(2),
                 next_image_callback=lambda: pbar.update(1),
@@ -253,7 +234,7 @@ def run(output_path, image_path):
     logging.set_log_destination(logging.INFO, output_path / "INFO.log")
     
     imp = xFeatImplementation(database_path)
-    imp.extract_and_math_features(str(image_path)+"\\", 15000)
+    imp.extract_and_math_features(str(image_path)+"\\", 8192)
 
     # # print(imp.pair_id_to_image_ids(2147483649.0))
 
@@ -267,7 +248,14 @@ def run(output_path, image_path):
     
     imp.db.close()
 
-    recs = pycolmap.incremental_mapping(
+    # recs = pycolmap.incremental_mapping(
+    #             str(database_path),
+    #             str(image_path),
+    #             str(sfm_path)
+    #         )
+    print(image_path)
+    recs = incremental_mapping_with_pbar(
+                imp.num_images,
                 str(database_path),
                 str(image_path),
                 str(sfm_path)
