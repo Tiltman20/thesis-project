@@ -39,12 +39,12 @@ class xFeatImplementation:
         self.db = Database(str(path_to_db))
         self.db.create_tables()
     
-    def write_camera_to_db(self):
+    def write_camera_to_db(self, model, width, height, params):
         self.db.add_camera(
-            model=1,
-            width=1920/2,
-            height=1080/2,
-            params=[1920/2, 1080/2, 960/2, 540/2]
+            model=model,
+            width=width,
+            height=height,
+            params=params
         )
         self.db.commit()
     
@@ -121,7 +121,7 @@ class xFeatImplementation:
 
         cam_id = 1
         img_id = 1
-        self.write_camera_to_db()
+        self.write_camera_to_db(model=1, width=1920/2, height=1080/2, params=[1920/2, 1080/2, 960/2, 540/2])
         print("Extracting features...")
         for img in progressbar(images):
             self.add_image_to_db(img_id, cam_id, img)
@@ -223,17 +223,16 @@ def incremental_mapping_with_pbar(num_images, database_path, image_path, sfm_pat
             )
     return reconstructions
 
-def run(output_path, image_path):
+def run(output_path, image_path, database_path):
     # output_path = Path("res/test_results/Rittmeier/test_2")
     # image_path = Path("res/images/Rittmeier/test_2/scaled")
-    database_path = output_path / "database.db"
     sfm_path = output_path / "sfm"
-    mvs_path = output_path / "mvs"
 
     output_path.mkdir(exist_ok=True)
     logging.set_log_destination(logging.INFO, output_path / "INFO.log")
+    path_to_db= Path(database_path) / "database.db"
     
-    imp = xFeatImplementation(database_path)
+    imp = xFeatImplementation(path_to_db)
     imp.extract_and_math_features(str(image_path)+"\\", 8192)
 
     # # print(imp.pair_id_to_image_ids(2147483649.0))
@@ -253,10 +252,9 @@ def run(output_path, image_path):
     #             str(image_path),
     #             str(sfm_path)
     #         )
-    print(image_path)
     recs = incremental_mapping_with_pbar(
                 imp.num_images,
-                str(database_path),
+                str(path_to_db),
                 str(image_path),
                 str(sfm_path)
             )

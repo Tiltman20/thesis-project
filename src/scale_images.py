@@ -6,7 +6,6 @@ import progressbar
 def resize(root_folder, image, scale, count, filename):
     if image is None:
         return
-
     h, w = image.shape[:2]
     img_small = cv2.resize(image, (int(w*scale), int(h*scale)), interpolation=cv2.INTER_AREA)
     cv2.imwrite(os.path.join(root_folder + "\\scaled", f"{filename}.jpg"), img_small)
