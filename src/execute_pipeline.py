@@ -54,10 +54,10 @@ def main():
         )
     else:
         pass
-        # cf.run(Path(COLMAP_BASE_PATH),
-        #         IMAGE_PATH,
-        #         Path(DATABASE_PATH)
-        #         )
+        cf.run(Path(COLMAP_BASE_PATH),
+                IMAGE_PATH,
+                Path(DATABASE_PATH)
+                )
     if not args.norender:
         subprocess.run([
             r"C:\Users\tilma\Documents\GitHub\bachelor-thesis\thesis-project-1\src\render_gaussians.bat",
