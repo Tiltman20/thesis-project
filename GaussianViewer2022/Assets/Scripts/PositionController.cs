@@ -41,7 +41,15 @@ namespace GaussianViewer{
             {
                 if (!imageShown)
                 {
-                    var sprite = loadImage("Assets/Resources/images/" + CameraManager.camPoses[index].ImageName);
+                    var rootPath = Application.dataPath;
+                    if (Application.platform == RuntimePlatform.OSXPlayer) {
+                        rootPath += "/../../";
+                    }
+                    else if (Application.platform == RuntimePlatform.WindowsPlayer) {
+                        rootPath += "/../";
+                    }
+                    string[] files = Directory.GetFiles(rootPath, "images/*");
+                    var sprite = loadImage(files[index]);
                     actualImageUI.sprite = sprite;
                     actualImageUI.color = new Color(1,1,1,1);
                     imageShown = true;

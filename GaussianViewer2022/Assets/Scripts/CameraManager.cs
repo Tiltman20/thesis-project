@@ -1,11 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
-using Unity.VisualScripting;
 using System;
-using System.IO;
-using Microsoft.Unity.VisualStudio.Editor;
 
 namespace GaussianViewer{
     public class CameraManager : MonoBehaviour

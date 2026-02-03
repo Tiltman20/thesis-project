@@ -34,8 +34,16 @@ namespace GaussianViewer{
         public List<CameraPose> Parse()
         {
             var poses = new List<CameraPose>();
+            var rootPath = Application.dataPath;
+            if (Application.platform == RuntimePlatform.OSXPlayer) {
+                rootPath += "/../../";
+            }
+            else if (Application.platform == RuntimePlatform.WindowsPlayer) {
+                rootPath += "/../";
+            }
+            string[] files = Directory.GetFiles(rootPath, "images.bin");
 
-            using var fs = new FileStream(pathToImageBinary, FileMode.Open, FileAccess.Read);
+            using var fs = new FileStream(files[0], FileMode.Open, FileAccess.Read);
             using var br = new BinaryReader(fs);
 
             ulong numImages = br.ReadUInt64();
@@ -152,7 +160,15 @@ namespace GaussianViewer{
         {
             var cameras = new List<ColmapCamera>();
 
-            using var fs = new FileStream(pathToCameraBinary, FileMode.Open, FileAccess.Read);
+            var rootPath = Application.dataPath;
+            if (Application.platform == RuntimePlatform.OSXPlayer) {
+                rootPath += "/../../";
+            }
+            else if (Application.platform == RuntimePlatform.WindowsPlayer) {
+                rootPath += "/../";
+            }
+            string[] files = Directory.GetFiles(rootPath, "*cameras.bin");
+            using var fs = new FileStream(files[0], FileMode.Open, FileAccess.Read);
             using var br = new BinaryReader(fs);
 
             ulong numCameras = br.ReadUInt64();
