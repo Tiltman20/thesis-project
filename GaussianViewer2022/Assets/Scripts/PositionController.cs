@@ -48,8 +48,8 @@ namespace GaussianViewer{
                     else if (Application.platform == RuntimePlatform.WindowsPlayer) {
                         rootPath += "/../";
                     }
-                    string[] files = Directory.GetFiles(rootPath, "images/*");
-                    var sprite = loadImage(files[index]);
+                    string[] files = Directory.GetFiles(rootPath, "images/" + CameraManager.image_ids[index] );
+                    var sprite = loadImage(files[0]);
                     actualImageUI.sprite = sprite;
                     actualImageUI.color = new Color(1,1,1,1);
                     imageShown = true;
@@ -77,6 +77,16 @@ namespace GaussianViewer{
         {
             index += direction;
             index %= CameraManager.cameras.Count;
+            var camTransform = CameraManager.cameras[index].transform;
+            gameObject.transform.position = camTransform.position;
+            gameObject.transform.rotation = camTransform.rotation;
+            imageInfo.text = CameraManager.image_ids[index] + " \nRotation: " + gameObject.transform.rotation;
+        }
+
+        public void JumpToCamera(int index)
+        {
+            if (index < 0 || index >= CameraManager.cameras.Count) return;
+            this.index = index;
             var camTransform = CameraManager.cameras[index].transform;
             gameObject.transform.position = camTransform.position;
             gameObject.transform.rotation = camTransform.rotation;
