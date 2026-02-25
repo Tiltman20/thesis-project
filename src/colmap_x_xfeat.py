@@ -138,26 +138,38 @@ class xFeatImplementation:
 
         global num_images 
         num_images = len(self.features)
+        temporal_window = 5
+        long_baseline_step = 10
 
         for i, f1 in progressbar(enumerate(self.features)):
-            for j in range(i + 1, min(num_images, i+5)):   # nur Paare i < j
+            for j in range(i + 1, num_images):   # nur Paare i < j
+                if not (j - i <= temporal_window or (j-i) % long_baseline_step == 0): continue
                 f2 = self.features[j]
 
                 match = self.match_features(f1, f2)
                 if len(match[0]) < 15:
                     continue
 
-                matches_for_db = np.column_stack([match[0], match[1]]).astype(np.uint32)
+                matches = np.column_stack([match[0], match[1]]).astype(np.uint32)
+
+                verified = self.geometric_verification(
+                    f1["keypoints"].cpu().numpy(),
+                    f2["keypoints"].cpu().numpy(),
+                    matches
+                )
+
+                if verified is None or len(verified) < 30:
+                    continue
                 # print(f"Image {i} -> Image {j} with len {len(matches_for_db)}")
 
                 # Speichere Matches
-                self.db.add_matches(i + 1, j + 1, matches_for_db)
+                self.db.add_matches(i + 1, j + 1, verified)
 
                 if i % 50 == 0:
-                    self.draw_matches(images[i], images[j], matches_for_db, f1, f2)
+                    self.draw_matches(images[i], images[j], verified, f1, f2)
 
                 # Geometrie: fundamental matrix preferred
-                self.db.add_two_view_geometry(i + 1, j + 1, matches_for_db, config=2)
+                self.db.add_two_view_geometry(i + 1, j + 1, verified, config=2)
 
             self.db.commit()
 
@@ -210,7 +222,23 @@ class xFeatImplementation:
                 color[i] = 0
         return color
     
-    
+    def geometric_verification(self, kp1, kp2, matches):
+        pts1 = kp1[matches[:,0]]
+        pts2 = kp2[matches[:,1]]
+
+        F, mask = cv2.findFundamentalMat(
+            pts1, pts2,
+            cv2.FM_RANSAC,
+            ransacReprojThreshold=1.0,
+            confidence=0.999,
+            maxIters=10000
+        )
+
+        if F is None:
+            return None
+        
+        inliers = mask.ravel().astype(bool)
+        return matches[inliers]
 
 
 
@@ -254,19 +282,87 @@ def run(output_path, image_path, database_path):
     
     imp.db.close()
 
+    mapper_opts = pycolmap.IncrementalMapperOptions()
+
+    # ==============================
+    # Registrierung stabilisieren
+    # ==============================
+    mapper_opts.abs_pose_min_num_inliers = 50
+    mapper_opts.abs_pose_min_inlier_ratio = 0.25
+    mapper_opts.abs_pose_max_error = 4.0
+
+    mapper_opts.max_reg_trials = 3
+
+    # ==============================
+    # Initiales Bildpaar (sehr wichtig!)
+    # ==============================
+    mapper_opts.init_min_num_inliers = 200
+    mapper_opts.init_min_tri_angle = 8.0      # default 16 ist sehr streng → 8 ist stabiler
+    mapper_opts.init_max_error = 2.0
+
+    # ==============================
+    # 🔴 Punktfilter gegen Boden-Blob
+    # ==============================
+    mapper_opts.filter_max_reproj_error = 1.0
+    mapper_opts.filter_min_tri_angle = 3.0    # default 1.5 → HUGE Unterschied
+
+    # ==============================
+    # 🔴 Local Bundle Adjustment
+    # ==============================
+    mapper_opts.ba_local_min_tri_angle = 4.0  # extrem wichtig für planar scenes
+    mapper_opts.ba_local_num_images = 6
+
+    # ==============================
+    # Degenerate Intrinsics Filter
+    # ==============================
+    mapper_opts.min_focal_length_ratio = 0.1
+    mapper_opts.max_focal_length_ratio = 10.0
+    mapper_opts.max_extra_param = 1.0
+
+    # ==============================
+    # Performance / determinism
+    # ==============================
+    mapper_opts.num_threads = -1
+    mapper_opts.random_seed = 0
+
+    tri_opts = pycolmap.IncrementalTriangulatorOptions()
+
+    tri_opts.min_angle = 4.0
+    tri_opts.ignore_two_view_tracks = True
+    tri_opts.max_transitivity = 1
+
+    tri_opts.create_max_angle_error = 1.0
+    tri_opts.continue_max_angle_error = 1.0
+    tri_opts.merge_max_reproj_error = 1.0
+    tri_opts.complete_max_reproj_error = 1.0
+    tri_opts.re_max_angle_error = 1.0
+
+    # Output anzeigen (sehr hilfreich)
+    # solver.minimizer_progress_to_stdout = True
+    # solver.logging_type = pycolmap.LoggingType.PER_MINIMIZER_ITERATION
+
     # recs = pycolmap.incremental_mapping(
     #             str(database_path),
     #             str(image_path),
     #             str(sfm_path)
     #         )
-    recs = incremental_mapping_with_pbar(
-                imp.num_images,
-                str(path_to_db),
-                str(image_path),
-                str(output_path)
-            )
-    for idx, rec in recs.items():
-        logging.info(f"#{idx} {rec.summary()}")
+    pipeline_opts = pycolmap.IncrementalPipelineOptions(
+        mapper=mapper_opts,
+        triangulation=tri_opts,
+    )
+
+    recs = pycolmap.incremental_mapping(
+        database_path=str(path_to_db),
+        image_path=str(image_path),
+        output_path=str(output_path),
+        options=pipeline_opts
+    )
+    # for rec in recs.values():
+    #     rec.filter_points3D(
+    #         max_reproj_error=1.0,
+    #         min_track_len=4
+    #     )
+    #     rec.write(output_path / "refined")
     # dense reconstruction
     # pycolmap.undistort_images(mvs_path, output_path/"sfm23"/"0", image_path)
     # pycolmap.patch_match_stereo(mvs_path)  # requires compilation with CUDA
