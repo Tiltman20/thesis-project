@@ -1,7 +1,6 @@
 import sqlite3
 import numpy as np
 
-# === HIER DEIN PFAD EINTRAGEN ===
 DB_PATH = "res\\test_results\\test1\\database.db"
 
 # pair_id -> (i, j)

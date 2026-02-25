@@ -29,6 +29,8 @@ import glob
 import numpy as np
 from progressbar import progressbar
 
+top_k_matches = 8192
+
 class xFeatImplementation:
 
     num_images = 0
@@ -121,7 +123,7 @@ class xFeatImplementation:
 
         cam_id = 1
         img_id = 1
-        self.write_camera_to_db(model=1, width=1920/2, height=1080/2, params=[1920/2, 1080/2, 960/2, 540/2])
+        self.write_camera_to_db(model=1, width=960, height=540, params=[1393, 1181, 480, 270])
         print("Extracting features...")
         for img in progressbar(images):
             self.add_image_to_db(img_id, cam_id, img)
@@ -207,6 +209,11 @@ class xFeatImplementation:
             if i != decider:
                 color[i] = 0
         return color
+    
+    
+
+
+
 
 def incremental_mapping_with_pbar(num_images, database_path, image_path, sfm_path):
     with enlighten.Manager() as manager:
@@ -233,16 +240,16 @@ def run(output_path, image_path, database_path):
     path_to_db= Path(database_path) / "database.db"
     
     imp = xFeatImplementation(path_to_db)
-    imp.extract_and_math_features(str(image_path)+"\\", 8192)
+    imp.extract_and_math_features(str(image_path)+"\\", top_k_matches)
 
     # # print(imp.pair_id_to_image_ids(2147483649.0))
 
     
-    sfm_count = 1
-    while sfm_path.exists():
-        sfm_path = output_path / f"sfm{sfm_count}"
-        sfm_count += 1
-    sfm_path.mkdir(exist_ok=True)
+    # sfm_count = 1
+    # while sfm_path.exists():
+    #     sfm_path = output_path / f"sfm{sfm_count}"
+    #     sfm_count += 1
+    # sfm_path.mkdir(exist_ok=True)
     print("Built SfM Path")
     
     imp.db.close()
@@ -256,7 +263,7 @@ def run(output_path, image_path, database_path):
                 imp.num_images,
                 str(path_to_db),
                 str(image_path),
-                str(sfm_path)
+                str(output_path)
             )
     for idx, rec in recs.items():
         logging.info(f"#{idx} {rec.summary()}")

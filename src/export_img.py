@@ -6,6 +6,7 @@ import progressbar as progressbar
 def export_images(video_path, image_path, max_images = 200):
   if not os.path.exists(image_path):
     os.makedirs(image_path)
+  print(image_path)
   vidcap = cv2.VideoCapture(video_path)
   success,image = vidcap.read()
   frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))

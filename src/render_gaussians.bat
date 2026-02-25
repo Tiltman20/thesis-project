@@ -1,4 +1,4 @@
-@echo off
+@REM @echo off
 setlocal EnableDelayedExpansion
 
 echo Starting Gaussian Rendering...
@@ -7,10 +7,10 @@ echo.
 REM --------------------------------------------------
 REM Pfade & Environment
 REM --------------------------------------------------
-set "ROOT=C:\Users\tilma\Documents\GitHub\bachelor-thesis\thesis-project-1\gaussian-splatting"
-set "OUTDIR=%ROOT%\output"
+set "ROOT=C:\Users\tilma\Documents\GitHub\bachelor-thesis\thesis-project-1"
+set "OUTDIR=%ROOT%\gaussian-splatting\output"
 
-cd /d "%ROOT%"
+cd /d "%ROOT%\gaussian-splatting"
 CALL C:\Users\tilma\miniconda3\Scripts\activate.bat gaussian_splatting
 
 REM --------------------------------------------------
@@ -22,9 +22,11 @@ if "%~1"=="" (
     goto :EOF
 )
 
-set "BASE_DIR=%~1\sparse"
+set "BASE_DIR=%ROOT%\%1"
 
-if not exist "%BASE_DIR%" (
+echo "BaseDir: %BASE_DIR%"
+
+if not exist "%BASE_DIR%\sparse" (
     echo FEHLER: Pfad existiert nicht:
     echo %BASE_DIR%
     goto :EOF
@@ -39,7 +41,7 @@ REM Ordner sammeln + Groessen berechnen
 REM --------------------------------------------------
 set INDEX=0
 
-for /d %%D in ("%BASE_DIR%\*") do (
+for /d %%D in ("%BASE_DIR%\sparse\*") do (
     set /a INDEX+=1
     set "FOLDER[!INDEX!]=%%~fD"
 
@@ -103,29 +105,29 @@ REM --------------------------------------------------
 set "NEW_NAME=0"
 
 
-for %%~ in ("%SELECTED_FOLDER%") do (
-set "PARENT_DIR=%%~dp."
-set "OLD_NAME=%%~nx."
+for %%I in ("%SELECTED_FOLDER%") do (
+    set "PARENT_DIR=%%~dpI"
+    set "OLD_NAME=%%~nxI"
 )
 
 
 set "NEW_FOLDER=%PARENT_DIR%%NEW_NAME%"
 
 
-if exist "%NEW_FOLDER%" (
-echo FEHLER: Zielordner existiert bereits:
-echo %NEW_FOLDER%
-goto :EOF
-)
+@REM if exist "%NEW_FOLDER%" (
+@REM echo FEHLER: Zielordner existiert bereits:
+@REM echo %NEW_FOLDER%
+@REM goto :EOF
+@REM )
 
 
 echo Benenne Ordner um:
 echo %SELECTED_FOLDER%
 echo -> %NEW_FOLDER%
 
-
-ren "%SELECTED_FOLDER%" "%NEW_NAME%"
-
+if not exist "%SELECTED_FOLDER%" (
+    ren "%SELECTED_FOLDER%" "%NEW_NAME%"
+)
 
 REM Pfad aktualisieren
 set "SELECTED_FOLDER=%NEW_FOLDER%"
@@ -134,7 +136,8 @@ REM --------------------------------------------------
 REM Training
 REM --------------------------------------------------
 echo Starte Training...
-python train.py -s %1
+echo Selected Folder: %SELECTED_FOLDER%
+python train.py -s %BASE_DIR%
 
 REM --------------------------------------------------
 REM Neuesten Output-Ordner finden
@@ -160,7 +163,7 @@ REM Rendering + Viewer
 REM --------------------------------------------------
 python render.py -m "%OUTDIR%\%NewestFolder%"
 
-"%ROOT%\SIBR_viewers\install\bin\SIBR_gaussianViewer_app_rwdi.exe" ^
+"%ROOT%\gaussian-splatting\SIBR_viewers\install\bin\SIBR_gaussianViewer_app_rwdi.exe" ^
     -m "%OUTDIR%\%NewestFolder%"
 
 endlocal
