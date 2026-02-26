@@ -15,21 +15,6 @@ public class GaussianCalibrationManager : MonoBehaviour
     void Start()
     {
         positionController.lockMovement = true;
-        // rotationSliders[0].onValueChanged += OnSliderChanged(new Vector3(rotationSliders[0].value, 0, 0));
-        // rotationSliders[1].onValueChanged += OnSliderChanged(new Vector3(0, rotationSliders[1].value, 0));
-        // rotationSliders[2].onValueChanged += OnSliderChanged(new Vector3(0, 0, rotationSliders[2].value));
-        rotationSliders[0].onValueChanged.AddListener(value =>
-        {
-            OnSliderChanged(new Vector3(value, rotationSliders[1].value, rotationSliders[2].value));
-        });
-        rotationSliders[1].onValueChanged.AddListener(value =>
-        {
-            OnSliderChanged(new Vector3(rotationSliders[0].value, value, rotationSliders[2].value));
-        });
-        rotationSliders[2].onValueChanged.AddListener(value =>
-        {
-            OnSliderChanged(new Vector3(rotationSliders[0].value, rotationSliders[1].value, value));
-        });
     }
 
     // Update is called once per frame

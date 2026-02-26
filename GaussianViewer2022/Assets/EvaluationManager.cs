@@ -12,6 +12,7 @@ public class EvaluationManager : MonoBehaviour
     [SerializeField] private ImageGrabber imageGrabber;
     [SerializeField] private string batchFileName = "run_evaluation.bat";
     [SerializeField] private TMPro.TextMeshProUGUI debugText;
+    private CameraManager CameraManager => positionController.currentCameraManager;
 
     public void StartEvaluation()
     {

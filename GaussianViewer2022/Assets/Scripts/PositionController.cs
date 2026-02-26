@@ -1,22 +1,28 @@
 using TMPro;
 using UnityEngine;
 using System.IO;
+using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace GaussianViewer{
     public class PositionController : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI imageInfo;
+        [SerializeField] private TextMeshProUGUI versionInfo;
         [SerializeField] private float sensitivity;
         [SerializeField] private UnityEngine.UI.Image actualImageUI;
+        [SerializeField] private List<CameraManager> cameraManagers;
+        private int cameraManagerIndex = 0;
+        public CameraManager currentCameraManager => cameraManagers[cameraManagerIndex];
         private int index = 0;
         public bool imageShown = false;
         public bool lockMovement;
         public void Init()
         {
-            var camTransform = CameraManager.cameras[index].transform;
+            var camTransform = currentCameraManager.cameras[index].transform;
             gameObject.transform.position = camTransform.position;
             gameObject.transform.rotation = camTransform.rotation;
-            imageInfo.text = CameraManager.image_ids[index] + " \nRotation: " + gameObject.transform.rotation;
+            imageInfo.text = currentCameraManager.image_ids[index] + " \nRotation: " + gameObject.transform.rotation;
         }
 
         // Update is called once per frame
@@ -27,6 +33,24 @@ namespace GaussianViewer{
             {
                 IterateCamera(1);
             }
+            if (Input.GetKeyDown(KeyCode.I))
+            {
+                var oldName = currentCameraManager.image_ids[index];
+                var prevCameraManager = currentCameraManager;
+                cameraManagerIndex += 1;
+                cameraManagerIndex %= cameraManagers.Count;
+                var newIndex = currentCameraManager.image_ids.IndexOf(oldName);
+                if (newIndex != -1){
+                    index = newIndex;
+                }
+                currentCameraManager.gameObject.SetActive(true);
+                prevCameraManager.gameObject.SetActive(false);
+                var camTransform = currentCameraManager.cameras[index].transform;
+                gameObject.transform.position = camTransform.position;
+                gameObject.transform.rotation = camTransform.rotation;
+                imageInfo.text = currentCameraManager.image_ids[index];
+                versionInfo.text = "Camera Set: " + cameraManagerIndex;
+            }
             if (Input.GetKeyDown(KeyCode.LeftShift))
             {
                 IterateCamera(-1);
@@ -34,8 +58,8 @@ namespace GaussianViewer{
             if (Input.GetKeyDown(KeyCode.P))
             {
                 index = LocateClosestLocation();
-                gameObject.transform.position = CameraManager.cameras[index].transform.position;
-                gameObject.transform.rotation = CameraManager.cameras[index].transform.rotation;
+                gameObject.transform.position = currentCameraManager.cameras[index].transform.position;
+                gameObject.transform.rotation = currentCameraManager.cameras[index].transform.rotation;
             }
             if (Input.GetKeyDown(KeyCode.G))
             {
@@ -48,7 +72,7 @@ namespace GaussianViewer{
                     else if (Application.platform == RuntimePlatform.WindowsPlayer) {
                         rootPath += "/../";
                     }
-                    string[] files = Directory.GetFiles(rootPath, "images/" + CameraManager.image_ids[index] );
+                    string[] files = Directory.GetFiles(rootPath, "images/" + currentCameraManager.image_ids[index] );
                     var sprite = loadImage(files[0]);
                     actualImageUI.sprite = sprite;
                     actualImageUI.color = new Color(1,1,1,1);
@@ -76,21 +100,21 @@ namespace GaussianViewer{
         void IterateCamera(int direction)
         {
             index += direction;
-            index %= CameraManager.cameras.Count;
-            var camTransform = CameraManager.cameras[index].transform;
+            index %= currentCameraManager.cameras.Count;
+            var camTransform = currentCameraManager.cameras[index].transform;
             gameObject.transform.position = camTransform.position;
             gameObject.transform.rotation = camTransform.rotation;
-            imageInfo.text = CameraManager.image_ids[index] + " \nRotation: " + gameObject.transform.rotation;
+            imageInfo.text = currentCameraManager.image_ids[index] + " \nRotation: " + gameObject.transform.rotation;
         }
 
         public void JumpToCamera(int index)
         {
-            if (index < 0 || index >= CameraManager.cameras.Count) return;
+            if (index < 0 || index >= currentCameraManager.cameras.Count) return;
             this.index = index;
-            var camTransform = CameraManager.cameras[index].transform;
+            var camTransform = currentCameraManager.cameras[index].transform;
             gameObject.transform.position = camTransform.position;
             gameObject.transform.rotation = camTransform.rotation;
-            imageInfo.text = CameraManager.image_ids[index] + " \nRotation: " + gameObject.transform.rotation;
+            imageInfo.text = currentCameraManager.image_ids[index] + " \nRotation: " + gameObject.transform.rotation;
         }
 
         int LocateClosestLocation()
@@ -98,9 +122,9 @@ namespace GaussianViewer{
             int indexOfClosestLocation = 0;
             float distance = float.MaxValue;
 
-            for(int i = 0; i<CameraManager.cameras.Count; i++)
+            for(int i = 0; i<currentCameraManager.cameras.Count; i++)
             {
-                var tmpDistance = Vector3.Distance(CameraManager.cameras[i].transform.position, transform.position);
+                var tmpDistance = Vector3.Distance(currentCameraManager.cameras[i].transform.position, transform.position);
                 if (tmpDistance < distance)
                 {
                     distance = tmpDistance;

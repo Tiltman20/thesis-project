@@ -12,15 +12,17 @@ namespace GaussianViewer{
         [SerializeField] private GameObject cameraObject;
         [SerializeField] private PositionController positionController;
         [SerializeField] private Camera unityCamera;
-        public static List<Vector3> positions;
-        public static List<Quaternion> rotations;
-        public static List<GameObject> cameras;
-        public static List<String> image_ids;
-        public static List<BinaryImageParserNew.CameraPose> camPoses;
+        [SerializeField] private string BinaryPath;
+        public List<Vector3> positions;
+        public List<Quaternion> rotations;
+        public List<GameObject> cameras;
+        public List<String> image_ids;
+        public List<BinaryImageParserNew.CameraPose> camPoses;
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
         {
             // Debug.Log(SystemInfo.graphicsDeviceType);
+            parser.pathToBinary = BinaryPath;
             camPoses = parser.Parse();
             var camParams = parser.ParseCameras();
             var fovY = parser.calculateFOV(camParams[0]);
@@ -29,6 +31,7 @@ namespace GaussianViewer{
             rotations = new List<Quaternion>();
             image_ids = new List<string>();
             cameras = new List<GameObject>();
+
             StartCoroutine(DrawCameras());
         }
 
@@ -44,22 +47,18 @@ namespace GaussianViewer{
                 visualiser.transform.SetParent(parent);
                 visualiser.transform.localPosition = pose.PositionWorld;
                 visualiser.transform.rotation = pose.Rotation;
+                visualiser.name = pose.ImageName;
                 visualiser.GetComponent<CameraVisualiser>().target = cameraObject;
                 visualiser.GetComponent<CameraVisualiser>().imageName.text = pose.ImageName;
                 image_ids.Add(pose.ImageName);
                 cameras.Add(visualiser);
             }
             parent.localScale = new Vector3(1, -1, 1);
-            // parent.transform.rotation = cameraParent.transform.rotation;
-
-            // positionController.Init();
             yield return null;
         }   
         void ApplyColmapIntrinsics(float fovY)
         {
             unityCamera.fieldOfView = fovY;
-
-            // Optional, aber empfohlen:
             unityCamera.usePhysicalProperties = false;
         }
         

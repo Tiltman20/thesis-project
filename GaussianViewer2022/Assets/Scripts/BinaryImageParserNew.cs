@@ -11,8 +11,7 @@ using System;
 namespace GaussianViewer{
     public class BinaryImageParserNew : MonoBehaviour
     {
-        [SerializeField]private string pathToImageBinary;
-        [SerializeField] private string pathToCameraBinary;
+        public string pathToBinary;
         private string path = "BinaryLog.txt";
         public class CameraPose
         {
@@ -41,7 +40,7 @@ namespace GaussianViewer{
             else if (Application.platform == RuntimePlatform.WindowsPlayer) {
                 rootPath += "/../";
             }
-            string[] files = Directory.GetFiles(rootPath, "images.bin");
+            string[] files = Directory.GetFiles(rootPath+pathToBinary, "images.bin");
 
             using var fs = new FileStream(files[0], FileMode.Open, FileAccess.Read);
             using var br = new BinaryReader(fs);
@@ -167,7 +166,7 @@ namespace GaussianViewer{
             else if (Application.platform == RuntimePlatform.WindowsPlayer) {
                 rootPath += "/../";
             }
-            string[] files = Directory.GetFiles(rootPath, "*cameras.bin");
+            string[] files = Directory.GetFiles(rootPath+pathToBinary, "cameras.bin");
             using var fs = new FileStream(files[0], FileMode.Open, FileAccess.Read);
             using var br = new BinaryReader(fs);
 

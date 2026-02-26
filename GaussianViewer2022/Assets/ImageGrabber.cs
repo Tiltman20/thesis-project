@@ -7,8 +7,10 @@ namespace GaussianViewer{
     public class ImageGrabber : MonoBehaviour {
 
         [SerializeField] private Camera Cam;
+        [SerializeField] private PositionController positionController;
         public int FileCounter = 0;
         private string uniqueRootPath;
+        CameraManager CameraManager => positionController.currentCameraManager;
 
 
         public void InitGrabber()
