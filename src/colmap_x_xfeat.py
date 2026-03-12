@@ -29,6 +29,8 @@ import glob
 import numpy as np
 from progressbar import progressbar
 
+import generate_camera_intrinsics as pixel_fov_calculator
+
 top_k_matches = 8192
 
 class xFeatImplementation:
@@ -123,7 +125,8 @@ class xFeatImplementation:
 
         cam_id = 1
         img_id = 1
-        self.write_camera_to_db(model=1, width=960, height=540, params=[1393, 1181, 480, 270])
+        pixel_fov = pixel_fov_calculator.calculate([3840, 2160], [3, 2], 12.2) # Data from IPhone13 Pro
+        self.write_camera_to_db(model=1, width=960, height=540, params=[pixel_fov[0], pixel_fov[1], 480, 270])
         print("Extracting features...")
         for img in progressbar(images):
             self.add_image_to_db(img_id, cam_id, img)
@@ -284,44 +287,20 @@ def run(output_path, image_path, database_path):
 
     mapper_opts = pycolmap.IncrementalMapperOptions()
 
-    # ==============================
-    # Registrierung stabilisieren
-    # ==============================
     mapper_opts.abs_pose_min_num_inliers = 50
     mapper_opts.abs_pose_min_inlier_ratio = 0.25
     mapper_opts.abs_pose_max_error = 4.0
-
     mapper_opts.max_reg_trials = 3
-
-    # ==============================
-    # Initiales Bildpaar (sehr wichtig!)
-    # ==============================
     mapper_opts.init_min_num_inliers = 200
-    mapper_opts.init_min_tri_angle = 8.0      # default 16 ist sehr streng → 8 ist stabiler
+    mapper_opts.init_min_tri_angle = 8.0
     mapper_opts.init_max_error = 2.0
-
-    # ==============================
-    # 🔴 Punktfilter gegen Boden-Blob
-    # ==============================
     mapper_opts.filter_max_reproj_error = 1.0
-    mapper_opts.filter_min_tri_angle = 3.0    # default 1.5 → HUGE Unterschied
-
-    # ==============================
-    # 🔴 Local Bundle Adjustment
-    # ==============================
-    mapper_opts.ba_local_min_tri_angle = 4.0  # extrem wichtig für planar scenes
+    mapper_opts.filter_min_tri_angle = 3.0
+    mapper_opts.ba_local_min_tri_angle = 4.0
     mapper_opts.ba_local_num_images = 6
-
-    # ==============================
-    # Degenerate Intrinsics Filter
-    # ==============================
     mapper_opts.min_focal_length_ratio = 0.1
     mapper_opts.max_focal_length_ratio = 10.0
     mapper_opts.max_extra_param = 1.0
-
-    # ==============================
-    # Performance / determinism
-    # ==============================
     mapper_opts.num_threads = -1
     mapper_opts.random_seed = 0
 
@@ -337,15 +316,6 @@ def run(output_path, image_path, database_path):
     tri_opts.complete_max_reproj_error = 1.0
     tri_opts.re_max_angle_error = 1.0
 
-    # Output anzeigen (sehr hilfreich)
-    # solver.minimizer_progress_to_stdout = True
-    # solver.logging_type = pycolmap.LoggingType.PER_MINIMIZER_ITERATION
-
-    # recs = pycolmap.incremental_mapping(
-    #             str(database_path),
-    #             str(image_path),
-    #             str(sfm_path)
-    #         )
     pipeline_opts = pycolmap.IncrementalPipelineOptions(
         mapper=mapper_opts,
         triangulation=tri_opts,

@@ -1,4 +1,4 @@
-@REM @echo off
+@echo off
 setlocal EnableDelayedExpansion
 
 echo Starting Gaussian Rendering...
@@ -67,20 +67,45 @@ for /L %%I in (1,1,%INDEX%) do (
 )
 echo --------------------------------------------------
 
-REM --------------------------------------------------
-REM Nutzerauswahl
-REM --------------------------------------------------
-set /p CHOICE=Bitte Nummer auswaehlen: 
+@REM REM --------------------------------------------------
+@REM REM Nutzerauswahl
+@REM REM --------------------------------------------------
+@REM set /p CHOICE=Bitte Nummer auswaehlen: 
 
-if not defined FOLDER[%CHOICE%] (
-    echo Ungueltige Auswahl.
+@REM if not defined FOLDER[%CHOICE%] (
+@REM     echo Ungueltige Auswahl.
+@REM     goto :EOF
+@REM )
+
+@REM set "SELECTED_FOLDER=!FOLDER[%CHOICE%]!"
+
+@REM echo.
+@REM echo Ausgewaehlter Ordner:
+@REM echo %SELECTED_FOLDER%
+@REM echo.
+
+REM --------------------------------------------------
+REM Groessten Ordner automatisch auswaehlen
+REM --------------------------------------------------
+set "MAX_SIZE=-1"
+set "MAX_INDEX="
+
+for /L %%I in (1,1,%INDEX%) do (
+    if !SIZE[%%I]! GTR !MAX_SIZE! (
+        set "MAX_SIZE=!SIZE[%%I]!"
+        set "MAX_INDEX=%%I"
+    )
+)
+
+if not defined MAX_INDEX (
+    echo Konnte keinen groessten Ordner bestimmen.
     goto :EOF
 )
 
-set "SELECTED_FOLDER=!FOLDER[%CHOICE%]!"
+set "SELECTED_FOLDER=!FOLDER[%MAX_INDEX%]!"
 
 echo.
-echo Ausgewaehlter Ordner:
+echo Automatisch ausgewaehlter Ordner (groesster):
 echo %SELECTED_FOLDER%
 echo.
 
