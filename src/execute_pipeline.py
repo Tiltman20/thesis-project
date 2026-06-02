@@ -9,7 +9,7 @@ import os
 
 APP_ROOT = ""
 COLMAP_APP_ROOT = r"C:\Users\tilma\Documents\GitHub\bachelor-thesis\research\COLMAP\COLMAP.bat"
-VIDEO_PATH = "res/videos/Rittmeier/test_1.MOV"
+VIDEO_PATH = rf"E:\dataset\IMG_2668.MOV"
 
 
 def main():

@@ -10,8 +10,6 @@ import random
 
 import os
 
-# Try to import pycolmap and give actionable error if C++ backend is missing
-
 import pycolmap
 
 _project_root = Path(__file__).parent.parent
@@ -90,17 +88,12 @@ class xFeatImplementation:
     
     def extract_features(self, id, img, top_k):
         output = self.xfeat.detectAndCompute(img, top_k)
-        # print(output[0]["descriptors"].cpu().numpy().astype(np.float32))
-        # print()
-        # print()
-        # print(output[0]["keypoints"].cpu().numpy().astype(np.float32))
         self.write_descriptor_to_db(id, output[0]["descriptors"].cpu().numpy().astype(np.float32))
         self.write_keypoints_to_db(id, output[0]["keypoints"].cpu().numpy().astype(np.float32))
         return output[0]
 
     def match_features(self, feature1, feature2):
         idx1, idx2 = self.xfeat.match(feature1["descriptors"], feature2["descriptors"], min_cossim=-1) #for -1 see xfeat.match implementation
-        # print(idx1.cpu().numpy(), "\n", idx2.cpu().numpy())
         return (idx1.cpu().numpy(), idx2.cpu().numpy(),)
     
     def find_feature_idx(self, features, values):
@@ -163,22 +156,18 @@ class xFeatImplementation:
 
                 if verified is None or len(verified) < 30:
                     continue
-                # print(f"Image {i} -> Image {j} with len {len(matches_for_db)}")
 
-                # Speichere Matches
                 self.db.add_matches(i + 1, j + 1, verified)
 
                 if i % 50 == 0:
                     self.draw_matches(images[i], images[j], verified, f1, f2)
 
-                # Geometrie: fundamental matrix preferred
                 self.db.add_two_view_geometry(i + 1, j + 1, verified, config=2)
 
             self.db.commit()
 
 
     def draw_matches(self, img1, img2,  matches, feat1, feat2):
-        #print(img1, img2, feat1["keypoints"][0].cpu().numpy(), feat2["keypoints"][0].cpu().numpy())
         left_img = cv2.imread(img1)
         right_img = cv2.imread(img2)
 
@@ -187,7 +176,6 @@ class xFeatImplementation:
         canvas[:height, :width] = left_img
         canvas[:height, width:2*width] = right_img
 
-        # Draw points:
         for i in range(len(matches)):
             if i % 50 != 0:
                 continue
@@ -262,8 +250,6 @@ def incremental_mapping_with_pbar(num_images, database_path, image_path, sfm_pat
     return reconstructions
 
 def run(output_path, image_path, database_path):
-    # output_path = Path("res/test_results/Rittmeier/test_2")
-    # image_path = Path("res/images/Rittmeier/test_2/scaled")
     sfm_path = output_path / "sfm"
 
     output_path.mkdir(exist_ok=True)
@@ -272,15 +258,6 @@ def run(output_path, image_path, database_path):
     
     imp = xFeatImplementation(path_to_db)
     imp.extract_and_math_features(str(image_path)+"\\", top_k_matches)
-
-    # # print(imp.pair_id_to_image_ids(2147483649.0))
-
-    
-    # sfm_count = 1
-    # while sfm_path.exists():
-    #     sfm_path = output_path / f"sfm{sfm_count}"
-    #     sfm_count += 1
-    # sfm_path.mkdir(exist_ok=True)
     print("Built SfM Path")
     
     imp.db.close()
@@ -327,40 +304,8 @@ def run(output_path, image_path, database_path):
         output_path=str(output_path),
         options=pipeline_opts
     )
-    # for rec in recs.values():
-    #     rec.filter_points3D(
-    #         max_reproj_error=1.0,
-    #         min_track_len=4
-    #     )
-    #     rec.write(output_path / "refined")
-    # dense reconstruction
-    # pycolmap.undistort_images(mvs_path, output_path/"sfm23"/"0", image_path)
-    # pycolmap.patch_match_stereo(mvs_path)  # requires compilation with CUDA
-    # pycolmap.stereo_fusion(mvs_path / "dense.ply", mvs_path)
     
 
 if __name__ == "__main__":
     run()
     
-
-    # conn = sqlite3.connect("mydb.db")
-
-# Aktiviert Logging aller ausgeführten SQL-Statements
-    # conn.set_trace_callback(print)
-    # img1 = None
-    # img2 = None
-    # img1 = cv2.imread("testimages/test3/frame0.jpg")
-    # img2 = cv2.imread("testimages/test3/frame36.jpg")
-
-    # img1 = imp.xfeat.parse_input(img1)
-    # img2 = imp.xfeat.parse_input(img2)
-
-    # out1 = imp.xfeat.detectAndCompute(img1, top_k=256)[0]
-    # out2 = imp.xfeat.detectAndCompute(img2, top_k=256)[0]
-
-    # idxs0, idxs1 = imp.xfeat.match(out1['descriptors'], out2['descriptors'], min_cossim=-1 )
-
-    # print(out1['keypoints'][idxs0].cpu().numpy(), out2['keypoints'][idxs1].cpu().numpy())
-
-
-

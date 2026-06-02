@@ -157,6 +157,10 @@ MonoBehaviour:
   - {fileID: 1361766248}
   - {fileID: 2069512542}
   versionText: {fileID: 1785143937}
+  posC: {fileID: 963194229}
+  cameraManagers:
+  - {fileID: 1361766250}
+  - {fileID: 2069512544}
 --- !u!4 &8135399
 Transform:
   m_ObjectHideFlags: 0
@@ -220,6 +224,8 @@ MonoBehaviour:
     e31: 0
     e32: 0
     e33: 0
+  points: []
+  initialized: 0
 --- !u!1 &9309096
 GameObject:
   m_ObjectHideFlags: 0
@@ -1227,7 +1233,7 @@ Canvas:
   m_GameObject: {fileID: 625320072}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 1
+  m_RenderMode: 0
   m_Camera: {fileID: 963194227}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -1782,7 +1788,7 @@ PrefabInstance:
       objectReference: {fileID: 1757169522}
     - target: {fileID: 6197992991369763539, guid: 77c2b5bc46654af4098f5fe6c3d1d918, type: 3}
       propertyPath: sampleSize
-      value: 50
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 6197992991369763539, guid: 77c2b5bc46654af4098f5fe6c3d1d918, type: 3}
       propertyPath: setupCanvas
@@ -1796,6 +1802,30 @@ PrefabInstance:
       propertyPath: positionController
       value: 
       objectReference: {fileID: 963194229}
+    - target: {fileID: 6197992991369763539, guid: 77c2b5bc46654af4098f5fe6c3d1d918, type: 3}
+      propertyPath: camManagers.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6197992991369763539, guid: 77c2b5bc46654af4098f5fe6c3d1d918, type: 3}
+      propertyPath: camManagers.Array.data[0]
+      value: 
+      objectReference: {fileID: 1361766250}
+    - target: {fileID: 6197992991369763539, guid: 77c2b5bc46654af4098f5fe6c3d1d918, type: 3}
+      propertyPath: camManagers.Array.data[1]
+      value: 
+      objectReference: {fileID: 2069512544}
+    - target: {fileID: 6197992991369763539, guid: 77c2b5bc46654af4098f5fe6c3d1d918, type: 3}
+      propertyPath: cameraVisParents.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6197992991369763539, guid: 77c2b5bc46654af4098f5fe6c3d1d918, type: 3}
+      propertyPath: cameraVisParents.Array.data[0]
+      value: 
+      objectReference: {fileID: 1361766247}
+    - target: {fileID: 6197992991369763539, guid: 77c2b5bc46654af4098f5fe6c3d1d918, type: 3}
+      propertyPath: cameraVisParents.Array.data[1]
+      value: 
+      objectReference: {fileID: 2069512541}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2218,6 +2248,7 @@ GameObject:
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
   - component: {fileID: 963194229}
+  - component: {fileID: 963194230}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2318,8 +2349,26 @@ MonoBehaviour:
   cameraManagers:
   - {fileID: 1361766250}
   - {fileID: 2069512544}
+  cameraManagerIndex: 0
+  extractionMethod: 
   imageShown: 0
   lockMovement: 0
+  siftIndex: 0
+--- !u!114 &963194230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fb57b479595787428a2ab46de9c290a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  positionController: {fileID: 963194229}
+  canvases:
+  - {fileID: 1757169522}
 --- !u!1 &1036103576
 GameObject:
   m_ObjectHideFlags: 0
@@ -2791,10 +2840,11 @@ MonoBehaviour:
   cameraVisualiserPrefab: {fileID: 5367328482359337753, guid: 341ed956989215347822014b80fff3e5, type: 3}
   parser: {fileID: 1321992388}
   cameraParent: {fileID: 1361766247}
-  cameraObject: {fileID: 0}
+  cameraObject: {fileID: 963194225}
   positionController: {fileID: 963194229}
   unityCamera: {fileID: 963194227}
   BinaryPath: 
+  extractionMethod: 
   positions: []
   rotations: []
   cameras: []
@@ -2981,7 +3031,8 @@ MonoBehaviour:
   cameraObject: {fileID: 0}
   positionController: {fileID: 963194229}
   unityCamera: {fileID: 963194227}
-  BinaryPath: real
+  BinaryPath: sift-data
+  extractionMethod: 
   positions: []
   rotations: []
   cameras: []
@@ -3540,7 +3591,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3997,7 +4048,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1882170206
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4110,7 +4161,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 782628376}
         m_TargetAssemblyTypeName: EvaluationManager, Assembly-CSharp
-        m_MethodName: StartEvaluation
+        m_MethodName: Evaluate
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4312,7 +4363,8 @@ MonoBehaviour:
   cameraObject: {fileID: 0}
   positionController: {fileID: 963194229}
   unityCamera: {fileID: 963194227}
-  BinaryPath: splat
+  BinaryPath: xfeat-data
+  extractionMethod: 
   positions: []
   rotations: []
   cameras: []
@@ -4508,7 +4560,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

@@ -19,7 +19,7 @@ def main():
     if len(real_images) != len(splat_images):
         return
     
-    loss_fn_alex = lpips.LPIPS(net='alex') # best forward scores
+    loss_fn_alex = lpips.LPIPS(net='alex')
     ssim_results = []
     psnr_results = []
     lpips_results = []

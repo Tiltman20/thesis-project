@@ -13,7 +13,6 @@ def read_colmap_cameras(database_path):
     cameras = {}
 
     for camera_id, model_id, width, height, params_blob in rows:
-        # COLMAP speichert Parameter als Float64-Array im BLOB
         params = np.frombuffer(params_blob, dtype=np.float64)
 
         cameras[camera_id] = {

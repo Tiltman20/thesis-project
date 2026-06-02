@@ -13,6 +13,7 @@ namespace GaussianViewer{
         [SerializeField] private PositionController positionController;
         [SerializeField] private Camera unityCamera;
         [SerializeField] private string BinaryPath;
+        public string extractionMethod;
         public List<Vector3> positions;
         public List<Quaternion> rotations;
         public List<GameObject> cameras;
@@ -37,7 +38,7 @@ namespace GaussianViewer{
 
         IEnumerator DrawCameras()
         {
-            Debug.Log(string.Format("Loading {0} camera poses...", camPoses.Count));
+            // Debug.Log(string.Format("Loading {0} camera poses...", camPoses.Count));
 
             Transform parent = cameraParent.transform;
             foreach(var pose in camPoses)
@@ -48,7 +49,6 @@ namespace GaussianViewer{
                 visualiser.transform.localPosition = pose.PositionWorld;
                 visualiser.transform.rotation = pose.Rotation;
                 visualiser.name = pose.ImageName;
-                visualiser.GetComponent<CameraVisualiser>().target = cameraObject;
                 visualiser.GetComponent<CameraVisualiser>().imageName.text = pose.ImageName;
                 image_ids.Add(pose.ImageName);
                 cameras.Add(visualiser);

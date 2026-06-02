@@ -10,13 +10,16 @@ namespace GaussianViewer{
         [SerializeField] private TextMeshProUGUI imageInfo;
         [SerializeField] private TextMeshProUGUI versionInfo;
         [SerializeField] private float sensitivity;
-        [SerializeField] private UnityEngine.UI.Image actualImageUI;
+        [SerializeField] private Image actualImageUI;
         [SerializeField] private List<CameraManager> cameraManagers;
-        private int cameraManagerIndex = 0;
+        public int cameraManagerIndex = 0;
+        public string extractionMethod;
         public CameraManager currentCameraManager => cameraManagers[cameraManagerIndex];
         private int index = 0;
         public bool imageShown = false;
         public bool lockMovement;
+        public int siftIndex = 0;
+        private int swapCounter = 0;
         public void Init()
         {
             var camTransform = currentCameraManager.cameras[index].transform;
@@ -49,7 +52,27 @@ namespace GaussianViewer{
                 gameObject.transform.position = camTransform.position;
                 gameObject.transform.rotation = camTransform.rotation;
                 imageInfo.text = currentCameraManager.image_ids[index];
+                swapCounter++;
+                extractionMethod = siftIndex == swapCounter%2 ? "SIFT" : "xFeat";
+                versionInfo.text = extractionMethod;
+            }
+            if (Input.GetKeyDown(KeyCode.J))
+            {
+                var oldName = currentCameraManager.image_ids[index];
+                var prevCameraManager = currentCameraManager;
+                cameraManagerIndex += 1;
+                cameraManagerIndex %= cameraManagers.Count;
+                var newIndex = currentCameraManager.image_ids.IndexOf(oldName);
+                if (newIndex != -1){
+                    index = newIndex;
+                }
+                currentCameraManager.gameObject.SetActive(true);
+                prevCameraManager.gameObject.SetActive(false);
+                imageInfo.text = currentCameraManager.image_ids[index];
                 versionInfo.text = "Camera Set: " + cameraManagerIndex;
+                swapCounter++;
+                extractionMethod = siftIndex == swapCounter%2 ? "SIFT" : "xFeat";
+                versionInfo.text = extractionMethod;
             }
             if (Input.GetKeyDown(KeyCode.LeftShift))
             {
@@ -99,6 +122,7 @@ namespace GaussianViewer{
 
         void IterateCamera(int direction)
         {
+            if(index < 1) return;
             index += direction;
             index %= currentCameraManager.cameras.Count;
             var camTransform = currentCameraManager.cameras[index].transform;

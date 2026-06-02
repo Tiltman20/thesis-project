@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using GaussianViewer;
 using Unity.VisualScripting;
@@ -15,24 +16,52 @@ public class AlignPoints : MonoBehaviour
     // Start is called before the first frame update
     public void StartAlignmentProcess()
     {
-        GameObject[] camerasA = cameraManagerA.cameras.ToArray();
-        GameObject[] camerasB = cameraManagerB.cameras.ToArray();
+        Debug.Log("Arrays: "+ cameraManagerA.cameras.Count + ", " + cameraManagerB.cameras.Count);
 
-        camerasA = camerasA.OrderBy(cam => cam.name).ToArray();
-        camerasB = camerasB.OrderBy(cam => cam.name).ToArray();
+        var camerasA = cameraManagerA.cameras;
+        var camerasB = cameraManagerB.cameras;
 
-        transformSetA = new Transform[camerasA.Length];
-        transformSetB = new Transform[camerasB.Length];
+        // Dictionary für schnellen Zugriff auf B
+        var dictB = camerasB.ToDictionary(cam => GetFrameNumber(cam.name));
 
-        for (int i = 0; i < transformSetA.Length; i++)
+        var alignedA = new List<GameObject>();
+        var alignedB = new List<GameObject>();
+
+        foreach (var camA in camerasA)
         {
-            transformSetA[i] = camerasA[i].transform;
-            transformSetB[i] = camerasB[i].transform;
-            Debug.Log(camerasA[i].name == camerasB[i].name);
-            
+            int frame = GetFrameNumber(camA.name);
+
+            if (dictB.TryGetValue(frame, out var camB))
+            {
+                alignedA.Add(camA);
+                alignedB.Add(camB);
+            }
         }
+
+        // 🔽 Optional: sauber nach Frame sortieren
+        var sorted = alignedA
+            .Select((camA, i) => new
+            {
+                A = camA,
+                B = alignedB[i],
+                Frame = GetFrameNumber(camA.name)
+            })
+            .OrderBy(x => x.Frame)
+            .ToList();
+
+        camerasA = sorted.Select(x => x.A).ToList();
+        camerasB = sorted.Select(x => x.B).ToList();
+
+        Debug.Log("Matched pairs: " + camerasA.Count);
+
+        // Transform Arrays bauen
+        transformSetA = camerasA.Select(cam => cam.transform).ToArray();
+        transformSetB = camerasB.Select(cam => cam.transform).ToArray();
+
+        // Kabsch
         kabschSolver.inPoints = transformSetB;
         kabschSolver.referencePoints = transformSetA;
+
         var kabschTransform = kabschSolver.Init();
 
         Debug.Log(kabschTransform);
@@ -40,16 +69,12 @@ public class AlignPoints : MonoBehaviour
         Vector3 worldPos = kabschTransform.GetColumn(3);
         Quaternion worldRot = kabschTransform.rotation;
         cameraManagerB.transform.SetPositionAndRotation(worldPos, worldRot);
-
-        // for (int i = 0; i < cameraManagerA.cameras.Count; i++)
-        // {
-        //     cameraManagerA.cameras[i].transform.position = kabschSolver.kabschTransform.MultiplyPoint3x4(kabschSolver.points[i]);
-        // }
     }
 
-    // Update is called once per frame
-    void Update()
+    private int GetFrameNumber(string name)
     {
-        
+        var file = Path.GetFileNameWithoutExtension(name);
+        var numberPart = file.Split('_').Last();
+        return int.TryParse(numberPart, out var num) ? num : -1;
     }
 }
