@@ -16,6 +16,7 @@ The .bat - files are not fully functional as of now, however, the Python-file ``
 
 <h1 style="text-align:center;">Gaussian Viewer</h1>
 The Gaussian Viewer is a Unity Viewer based on UnityGaussianSplatting (https://github.com/aras-p/UnityGaussianSplatting) and runs in Unity 2022.3.47f1 and can be used with the following instructions after building the project in Unity:
+
 ### Change gaussian splattings
 
 Files to change:
