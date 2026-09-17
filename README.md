@@ -3,7 +3,7 @@
 
 This repository is the actual implementation and supporting material of my bachelor thesis. The topic is the improvement of COLMAPS approach to structure from motion by changing the feature extraction and matching to a more novel and modern approach using XFeat (https://github.com/verlab/accelerated_features) instead of SIFT.
 For installation run ```pip install -r requirements.txt```, install COLMAP (https://colmap.github.io) and Gaussian Splatting by INRIA (https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/).
-The .bat - files are not fully functional as of now, however, the Python-file ```execute-pipeline.py``` utilising the following arguments:
+The .bat - files are not fully functional as of now, however, the Python-file ```execute-pipeline.py``` utilising the following arguments can be used to run the application:
 ```
 --noimport: do not convert the source video to images
 --noscale: do not scale the extracted images
