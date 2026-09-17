@@ -1,5 +1,5 @@
 <h1 style="text-align:center;">Gaussian Splatting in Construction Sites</h1>
-<h5 style="text-align:center;">A comparison of different approaches to feature extraction and matching in structure from motion</h5>
+<h4 style="text-align:center;">A comparison of different approaches to feature extraction and matching in structure from motion</h4>
 
 This repository is the actual implementation and supporting material of my bachelor thesis. The topic is the improvement of COLMAPS approach to structure from motion by changing the feature extraction and matching to a more novel and modern approach using XFeat (https://github.com/verlab/accelerated_features) instead of SIFT.
 For installation run ```pip install -r requirements.txt```, install COLMAP (https://colmap.github.io) and Gaussian Splatting by INRIA (https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/).
