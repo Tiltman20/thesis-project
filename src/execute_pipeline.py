@@ -7,9 +7,9 @@ import argparse
 import subprocess
 import os
 
-APP_ROOT = ""
+APP_ROOT = "/home/tilman/Documents/GitHub/thesis-project"
 COLMAP_APP_ROOT = r"C:\Users\tilma\Documents\GitHub\bachelor-thesis\research\COLMAP\COLMAP.bat"
-VIDEO_PATH = rf"E:\dataset\IMG_2668.MOV"
+VIDEO_PATH = APP_ROOT + "/dataset/IMG_3232.MOV"
 
 
 def main():
@@ -54,8 +54,8 @@ def main():
     APP_ROOT = args.s
     if not os.path.exists(APP_ROOT):
         os.makedirs(APP_ROOT)
-    IMAGE_PATH = APP_ROOT + r"\images"
-    COLMAP_BASE_PATH = APP_ROOT + r"\sparse"
+    IMAGE_PATH = APP_ROOT + "/images"
+    COLMAP_BASE_PATH = APP_ROOT + "\sparse"
     DATABASE_PATH = APP_ROOT
     if not args.noimport:
         exim.export_images(VIDEO_PATH, IMAGE_PATH)

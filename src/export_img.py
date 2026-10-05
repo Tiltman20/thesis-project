@@ -11,6 +11,7 @@ def export_images(video_path, image_path, max_images = 200):
   success,image = vidcap.read()
   frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
   steps = frame_count//max_images
+  steps = max(1, min(steps, frame_count))
   actual_count = 0
 
   for i in progressbar.progressbar(range(frame_count), 0, frame_count, prefix="Exporting Images:"):

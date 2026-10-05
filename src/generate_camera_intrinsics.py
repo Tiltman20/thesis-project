@@ -31,5 +31,8 @@ def calculate(img_size, sensor_aspect, sensor_area):
     fov = pixel_fov(img_size[0], img_size[1], CF, sensor_area, sensor_aspect[0], sensor_aspect[1])
     return fov
 
-fov_calculated = calculate([3840, 2160], [3, 2], 12.2)
-print("Pixel FOV:", fov_calculated)
+def get_real_focal_length(sensor_area, sensor_aspect):
+    return real_fov(13, crop_factor(get_sensor_size_from_area(sensor_area, sensor_aspect[0], sensor_aspect[1])[0], get_sensor_size_from_area(sensor_area, sensor_aspect[0], sensor_aspect[1])[1]))
+
+# fov_calculated = calculate([3840, 2160], [3, 2], 12.2)
+# print("Pixel FOV:", fov_calculated)
