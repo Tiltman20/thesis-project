@@ -257,7 +257,7 @@ def run(output_path, image_path, database_path):
     path_to_db= Path(database_path) / "database.db"
     
     imp = xFeatImplementation(path_to_db)
-    imp.extract_and_math_features(str(image_path)+"\\", top_k_matches)
+    imp.extract_and_math_features(str(image_path)+"/", top_k_matches)
     print("Built SfM Path")
     
     imp.db.close()
